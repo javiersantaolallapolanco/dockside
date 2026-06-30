@@ -4,27 +4,14 @@ runtime_compose_exists() {
     docker compose version >/dev/null 2>&1
 }
 
-runtime_compose() {
-    compose_file="$1"
-    shift
+runtime_compose_run() {
+    env_file="$1"
+    compose_file="$2"
+    shift 2
 
-    docker compose -f "$compose_file" "$@"
-}
-
-runtime_compose_pull() {
-    compose_file="$1"
-
-    runtime_compose "$compose_file" pull
-}
-
-runtime_compose_up() {
-    compose_file="$1"
-
-    runtime_compose "$compose_file" up -d
-}
-
-runtime_compose_down() {
-    compose_file="$1"
-
-    runtime_compose "$compose_file" down
+    if [ -n "$env_file" ] && [ -f "$env_file" ]; then
+        docker compose --env-file "$env_file" -f "$compose_file" "$@"
+    else
+        docker compose -f "$compose_file" "$@"
+    fi
 }

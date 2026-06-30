@@ -23,6 +23,7 @@ Commands
   doctor
   check
   status
+  deploy
   version
 HELP
         ;;
@@ -30,6 +31,7 @@ HELP
         cat "$DOCKSIDE_ROOT/VERSION"
         ;;
     *)
-        command_run "$CMD" "${@:2}"
+        shift || true
+        command_run "$CMD" "$@"
         ;;
 esac

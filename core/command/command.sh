@@ -6,12 +6,12 @@ command_run() {
 
     script="$DOCKSIDE_ROOT/core/$namespace/$command/run.sh"
 
-    if [ ! -x "$script" ]; then
+    if [ ! -f "$script" ]; then
         printf '%s\n' "ERROR: command not found: $namespace/$command" >&2
         exit 1
     fi
 
     shift 2
 
-    exec "$script" "$@"
+    . "$script"
 }

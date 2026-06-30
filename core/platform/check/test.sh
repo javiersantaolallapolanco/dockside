@@ -5,4 +5,8 @@ SELF_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 DOCKSIDE_ROOT="$(CDPATH= cd -- "$SELF_DIR/../../.." && pwd)"
 export DOCKSIDE_ROOT
 
-"$DOCKSIDE_ROOT/core/platform/check/run.sh"
+. "$DOCKSIDE_ROOT/core/bootstrap/bootstrap.sh"
+
+bootstrap_init
+
+. "$DOCKSIDE_ROOT/core/platform/check/run.sh"

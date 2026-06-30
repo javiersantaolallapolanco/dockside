@@ -1,67 +1,45 @@
 #!/bin/sh
 set -eu
 
-ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+SELF_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+DOCKSIDE_ROOT="$(CDPATH= cd -- "$SELF_DIR/.." && pwd)"
+export DOCKSIDE_ROOT
+
+. "$DOCKSIDE_ROOT/core/bootstrap/bootstrap.sh"
+
+bootstrap_init
+
 CMD="${1:-help}"
 
-case "$CMD" in
-  help|-h|--help)
-    cat <<HELP
+show_help() {
+cat <<HELP
 Dockside
 
-Usage:
+Usage
+
   dockside help
   dockside version
-  dockside platform <command>
-  dockside app <command>
+  dockside doctor
 
-Platform commands:
-  init
-  deploy
-  status
-  doctor
-  update
-  backup
-  restore
-
-App commands:
-  create
-  deploy
-  remove
-  logs
-  status
 HELP
+}
+
+case "$CMD" in
+
+help|-h|--help)
+    show_help
     ;;
 
-  version)
-    cat "$ROOT_DIR/VERSION"
+version)
+    cat "$DOCKSIDE_ROOT/VERSION"
     ;;
 
-  platform)
-    shift
-    SUBCMD="${1:-help}"
-    SCRIPT="$ROOT_DIR/core/platform/$SUBCMD/run.sh"
-    if [ ! -f "$SCRIPT" ]; then
-      echo "Unknown platform command: $SUBCMD" >&2
-      exit 1
-    fi
-    exec "$SCRIPT" "$@"
+doctor)
+    exec "$DOCKSIDE_ROOT/core/platform/doctor/run.sh"
     ;;
 
-  app)
-    shift
-    SUBCMD="${1:-help}"
-    SCRIPT="$ROOT_DIR/core/apps/$SUBCMD/run.sh"
-    if [ ! -f "$SCRIPT" ]; then
-      echo "Unknown app command: $SUBCMD" >&2
-      exit 1
-    fi
-    exec "$SCRIPT" "$@"
-    ;;
-
-  *)
+*)
     echo "Unknown command: $CMD" >&2
-    echo "Run: dockside help" >&2
     exit 1
     ;;
 esac

@@ -2,7 +2,7 @@
 
 compose_service_load_stack() {
     stack="$1"
-    conf="$DOCKSIDE_ROOT/config/stacks/$stack.conf"
+    conf="$DOCKSIDE_ROOT/catalog/config/$stack.conf"
 
     if [ ! -f "$conf" ]; then
         runtime_log_error "Stack config not found: $stack"
@@ -13,11 +13,6 @@ compose_service_load_stack() {
     ENV_FILE=""
 
     . "$conf"
-
-    if [ -z "$COMPOSE_FILE" ]; then
-        runtime_log_error "COMPOSE_FILE missing for stack: $stack"
-        return 1
-    fi
 
     COMPOSE_FILE="$DOCKSIDE_ROOT/$COMPOSE_FILE"
 

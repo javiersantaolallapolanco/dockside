@@ -11,6 +11,7 @@ export DOCKSIDE_ROOT
 bootstrap_init
 
 CMD="${1:-help}"
+[ "$#" -gt 0 ] && shift
 
 case "$CMD" in
     help|-h|--help)
@@ -31,7 +32,6 @@ HELP
         cat "$DOCKSIDE_ROOT/VERSION"
         ;;
     *)
-        shift || true
         command_run "$CMD" "$@"
         ;;
 esac

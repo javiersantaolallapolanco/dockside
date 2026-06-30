@@ -30,7 +30,7 @@ fi
 
 printf "\n"
 printf "Dockside Deploy\n"
-printf "============================\n\n"
+printf "%s\n\n" "============================"
 
 for stack in $stacks
 do

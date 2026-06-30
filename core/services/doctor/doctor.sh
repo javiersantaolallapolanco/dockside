@@ -103,7 +103,7 @@ doctor_run() {
 
     printf "\n"
     printf "Dockside Doctor\n"
-    printf "============================\n\n"
+    printf "%s\n\n" "============================"
 
     doctor_check "Shell" command -v sh
     doctor_check "Git" command -v git
@@ -121,7 +121,7 @@ doctor_run() {
 
     printf "\n"
     printf "Catalog stacks\n"
-    printf "----------------------------\n"
+    printf "%s\n" "----------------------------"
 
     if ! stacks="$(catalog_list)"; then
         doctor_fail=$((doctor_fail + 1))
@@ -142,7 +142,7 @@ doctor_run() {
 
     printf "\n"
     printf "Summary\n"
-    printf "----------------------------\n"
+    printf "%s\n" "----------------------------"
     printf "OK:   %s\n" "$doctor_ok"
     printf "WARN: %s\n" "$doctor_warn"
     printf "FAIL: %s\n" "$doctor_fail"

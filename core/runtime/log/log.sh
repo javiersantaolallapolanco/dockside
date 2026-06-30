@@ -1,13 +1,25 @@
 #!/bin/sh
 
+runtime_log() {
+    level="$1"
+    shift
+
+    printf '[%s] %s\n' "$level" "$*"
+}
+
 runtime_log_info() {
-    printf '%s\n' "[INFO] $*"
+    runtime_log INFO "$@"
 }
 
 runtime_log_warn() {
-    printf '%s\n' "[WARN] $*" >&2
+    runtime_log WARN "$@" >&2
 }
 
 runtime_log_error() {
-    printf '%s\n' "[ERROR] $*" >&2
+    runtime_log ERROR "$@" >&2
+}
+
+runtime_log_fatal() {
+    runtime_log ERROR "$@" >&2
+    exit 1
 }

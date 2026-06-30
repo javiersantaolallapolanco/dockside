@@ -20,3 +20,10 @@ assert_command_exists() {
         exit 1
     fi
 }
+
+assert_file_readable() {
+    if [ ! -r "$1" ]; then
+        printf '%s\n' "ERROR: file not readable: $1" >&2
+        exit 1
+    fi
+}

@@ -5,7 +5,7 @@ services:
     image: myoung34/github-runner:latest
     container_name: github-runner-mundial2026
     restart: unless-stopped
-    env_file: ../../env/github-runner.env
+    env_file: ../../../platform/env/github-runner.env.example
     environment:
       REPO_URL: https://github.com/${GITHUB_OWNER}/${GITHUB_REPOSITORY}
       RUNNER_NAME: ${RUNNER_NAME}

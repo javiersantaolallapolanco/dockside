@@ -16,7 +16,7 @@ services:
       - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
       - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
       - --api.dashboard=true
-    env_file: ../../env/traefik.env
+    env_file: ../../../platform/env/traefik.env.example
     ports:
       -   "8088:80"
       - "8443:443"

@@ -22,12 +22,16 @@ doctor_check() {
     name="$1"
     shift
 
-    if "$@" >/dev/null 2>&1; then
+    if "$@" >/tmp/dockside-doctor-check.out 2>&1; then
         doctor_ok=$((doctor_ok + 1))
         doctor_print_result "OK" "$name"
     else
         doctor_fail=$((doctor_fail + 1))
         doctor_print_result "FAIL" "$name"
+
+        if [ -s /tmp/dockside-doctor-check.out ]; then
+            sed -n '1,8p' /tmp/dockside-doctor-check.out | sed 's/^/    /'
+        fi
     fi
 }
 
@@ -35,12 +39,16 @@ doctor_warn_check() {
     name="$1"
     shift
 
-    if "$@" >/dev/null 2>&1; then
+    if "$@" >/tmp/dockside-doctor-check.out 2>&1; then
         doctor_ok=$((doctor_ok + 1))
         doctor_print_result "OK" "$name"
     else
         doctor_warn=$((doctor_warn + 1))
         doctor_print_result "WARN" "$name"
+
+        if [ -s /tmp/dockside-doctor-check.out ]; then
+            sed -n '1,4p' /tmp/dockside-doctor-check.out | sed 's/^/    /'
+        fi
     fi
 }
 
@@ -67,7 +75,7 @@ doctor_stack_config_valid() {
 
     . "$DOCKSIDE_ROOT/core/services/compose/compose-service.sh"
 
-    compose_service_load_stack "$stack" >/dev/null 2>&1
+    compose_service_load_stack "$stack"
 }
 
 doctor_stack_env_valid() {
@@ -75,7 +83,7 @@ doctor_stack_env_valid() {
 
     . "$DOCKSIDE_ROOT/core/services/compose/compose-service.sh"
 
-    compose_service_load_stack "$stack" >/dev/null 2>&1 || return 1
+    compose_service_load_stack "$stack" || return 1
 
     doctor_env_file_valid "$ENV_FILE"
 }
@@ -85,10 +93,10 @@ doctor_stack_compose_config_valid() {
 
     . "$DOCKSIDE_ROOT/core/services/compose/compose-service.sh"
 
-    compose_service_load_stack "$stack" >/dev/null 2>&1 || return 1
+    compose_service_load_stack "$stack" || return 1
 
     runtime_load compose
-    runtime_compose_run "$ENV_FILE" "$COMPOSE_FILE" config >/dev/null 2>&1
+    runtime_compose_run "$ENV_FILE" "$COMPOSE_FILE" config
 }
 
 doctor_run() {
@@ -139,6 +147,8 @@ doctor_run() {
             doctor_check "$stack compose config" doctor_stack_compose_config_valid "$stack"
         done
     fi
+
+    rm -f /tmp/dockside-doctor-check.out
 
     printf "\n"
     printf "Summary\n"

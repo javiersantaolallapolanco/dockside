@@ -1,0 +1,67 @@
+#!/bin/sh
+set -eu
+
+ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+CMD="${1:-help}"
+
+case "$CMD" in
+  help|-h|--help)
+    cat <<HELP
+Dockside
+
+Usage:
+  dockside help
+  dockside version
+  dockside platform <command>
+  dockside app <command>
+
+Platform commands:
+  init
+  deploy
+  status
+  doctor
+  update
+  backup
+  restore
+
+App commands:
+  create
+  deploy
+  remove
+  logs
+  status
+HELP
+    ;;
+
+  version)
+    cat "$ROOT_DIR/VERSION"
+    ;;
+
+  platform)
+    shift
+    SUBCMD="${1:-help}"
+    SCRIPT="$ROOT_DIR/core/platform/$SUBCMD/run.sh"
+    if [ ! -f "$SCRIPT" ]; then
+      echo "Unknown platform command: $SUBCMD" >&2
+      exit 1
+    fi
+    exec "$SCRIPT" "$@"
+    ;;
+
+  app)
+    shift
+    SUBCMD="${1:-help}"
+    SCRIPT="$ROOT_DIR/core/apps/$SUBCMD/run.sh"
+    if [ ! -f "$SCRIPT" ]; then
+      echo "Unknown app command: $SUBCMD" >&2
+      exit 1
+    fi
+    exec "$SCRIPT" "$@"
+    ;;
+
+  *)
+    echo "Unknown command: $CMD" >&2
+    echo "Run: dockside help" >&2
+    exit 1
+    ;;
+esac

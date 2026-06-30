@@ -1,22 +1,23 @@
 #!/bin/sh
 set -eu
 
-SELF_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-DOCKSIDE_ROOT="$(CDPATH= cd -- "$SELF_DIR/../../.." && pwd)"
-export DOCKSIDE_ROOT
+printf '\n'
+printf 'Dockside Doctor\n'
+printf '================\n\n'
 
-. "$DOCKSIDE_ROOT/core/runtime/runtime.sh"
+printf '%-20s' "Shell"
+command -v sh >/dev/null && echo "OK" || echo "FAIL"
 
-runtime_load log
+printf '%-20s' "Docker"
+command -v docker >/dev/null && echo "OK" || echo "FAIL"
 
-runtime_log_info "Running Dockside doctor"
+printf '%-20s' "Git"
+command -v git >/dev/null && echo "OK" || echo "FAIL"
 
-echo
-echo "Dockside Doctor"
-echo "================"
-echo "Platform : OK"
-echo "Runtime  : OK"
-echo "Registry : OK"
-echo
+printf '%-20s' "Curl"
+command -v curl >/dev/null && echo "OK" || echo "FAIL"
 
-runtime_log_info "Doctor finished successfully"
+printf '%-20s' "QTS"
+[ -d /etc/config ] && echo "OK" || echo "NO"
+
+printf '\nDoctor finished.\n'

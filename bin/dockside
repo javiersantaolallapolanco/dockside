@@ -26,6 +26,8 @@ Commands
   status
   deploy
   backup
+  restore
+  update
   version
 HELP
         ;;

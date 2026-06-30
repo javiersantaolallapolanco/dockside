@@ -25,6 +25,7 @@ Commands
   check
   status
   deploy
+  backup
   version
 HELP
         ;;

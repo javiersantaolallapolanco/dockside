@@ -6,40 +6,50 @@ DOCKSIDE_ROOT="$(CDPATH= cd -- "$SELF_DIR/.." && pwd)"
 export DOCKSIDE_ROOT
 
 . "$DOCKSIDE_ROOT/core/bootstrap/bootstrap.sh"
+. "$DOCKSIDE_ROOT/core/command/command.sh"
 
 bootstrap_init
 
 CMD="${1:-help}"
 
-show_help() {
+case "$CMD" in
+
+help|-h|--help)
 cat <<HELP
 Dockside
 
 Usage
 
-  dockside help
   dockside version
   dockside doctor
 
+  dockside platform <command>
+  dockside app <command>
+
 HELP
-}
-
-case "$CMD" in
-
-help|-h|--help)
-    show_help
-    ;;
+;;
 
 version)
     cat "$DOCKSIDE_ROOT/VERSION"
-    ;;
+;;
 
 doctor)
-    exec "$DOCKSIDE_ROOT/core/platform/doctor/run.sh"
-    ;;
+    command_run platform doctor
+;;
+
+platform)
+    shift
+    command_run platform "${1:-}"
+;;
+
+app)
+    shift
+    command_run app "${1:-}"
+;;
 
 *)
-    echo "Unknown command: $CMD" >&2
+    printf '%s\n' "Unknown command: $CMD" >&2
     exit 1
-    ;;
+;;
+
 esac

@@ -2,10 +2,10 @@
 
 set -eu
 
-BOOTSTRAP_SELF_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-DOCKSIDE_ROOT="$(CDPATH= cd -- "$BOOTSTRAP_SELF_DIR/../.." && pwd)"
-
-export DOCKSIDE_ROOT
+if [ -z "${DOCKSIDE_ROOT:-}" ]; then
+    printf '%s\n' "ERROR: DOCKSIDE_ROOT is not set before bootstrap" >&2
+    exit 1
+fi
 
 . "$DOCKSIDE_ROOT/stdlib/loader.sh"
 . "$DOCKSIDE_ROOT/core/context/context.sh"

@@ -14,13 +14,17 @@ CMD="${1:-help}"
 
 case "$CMD" in
     help|-h|--help)
-        echo "Dockside"
-        echo
-        echo "Commands:"
-        echo "  doctor"
-        echo "  check"
-        echo "  status"
-        echo "  version"
+        cat <<HELP
+Dockside
+
+Commands
+
+  init
+  doctor
+  check
+  status
+  version
+HELP
         ;;
     version)
         cat "$DOCKSIDE_ROOT/VERSION"

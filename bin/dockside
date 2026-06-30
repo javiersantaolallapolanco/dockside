@@ -12,9 +12,7 @@ bootstrap_init
 
 CMD="${1:-help}"
 
-case "$CMD" in
-
-help|-h|--help)
+show_help() {
 cat <<HELP
 Dockside
 
@@ -22,34 +20,44 @@ Usage
 
   dockside version
   dockside doctor
+  dockside check
 
   dockside platform <command>
   dockside app <command>
 
 HELP
-;;
+}
+
+case "$CMD" in
+
+help|-h|--help)
+    show_help
+    ;;
 
 version)
     cat "$DOCKSIDE_ROOT/VERSION"
-;;
+    ;;
 
 doctor)
     command_run platform doctor
-;;
+    ;;
+
+check)
+    command_run platform check
+    ;;
 
 platform)
     shift
     command_run platform "${1:-}"
-;;
+    ;;
 
 app)
     shift
     command_run app "${1:-}"
-;;
+    ;;
 
 *)
     printf '%s\n' "Unknown command: $CMD" >&2
     exit 1
-;;
-
+    ;;
 esac

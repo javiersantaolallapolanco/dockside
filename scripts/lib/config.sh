@@ -12,18 +12,11 @@ config_init() {
 DOCKER_ROOT=/share/CACHEDEV1_DATA/docker
 STACKS_DIR=${DOCKER_ROOT}/stacks
 ENV_DIR=${DOCKER_ROOT}/env
+APPS_DIR=${DOCKER_ROOT}/apps
 BACKUPS_DIR=${DOCKER_ROOT}/backups
-
-TRAEFIK_STACK=traefik
-SUPABASE_STACK=supabase
-RUNNER_STACK=github-runner
 
 WAIT_TIMEOUT=180
 WAIT_INTERVAL=5
-
-TRAEFIK_HEALTH_URL=
-SUPABASE_HEALTH_URL=http://127.0.0.1:8000/auth/v1/health
-RUNNER_HEALTH_URL=
 EOT
   fi
 }
@@ -34,8 +27,11 @@ config_load() {
 
   WAIT_TIMEOUT="${WAIT_TIMEOUT:-180}"
   WAIT_INTERVAL="${WAIT_INTERVAL:-5}"
+  APPS_DIR="${APPS_DIR:-$DOCKER_ROOT/apps}"
+  BACKUPS_DIR="${BACKUPS_DIR:-$DOCKER_ROOT/backups}"
 
   require_dir "$DOCKER_ROOT"
   require_dir "$STACKS_DIR"
   require_dir "$ENV_DIR"
+  require_dir "$APPS_DIR"
 }

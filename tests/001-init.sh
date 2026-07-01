@@ -2,5 +2,6 @@
 
 . "$(dirname "$0")/common.sh"
 
-run init \
-    test -f /share/CACHEDEV1_DATA/docker/dockside/dockside.env
+"$ROOT/bin/dockside" init >/dev/null
+
+run init test -f "$DOCKSIDE_INSTALL_DIR/dockside.env"

@@ -1,88 +1,33 @@
 #!/bin/sh
-
 set -eu
 
 SELF_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 DOCKSIDE_HOME=$(CDPATH= cd -- "$SELF_DIR/.." && pwd)
+export DOCKSIDE_HOME
 
-COMMAND="${1:-help}"
+CMD="${1:-help}"
+[ "$#" -gt 0 ] && shift
 
-[ $# -gt 0 ] && shift
-
-case "$COMMAND" in
-
-    start)
-        exec "$DOCKSIDE_HOME/scripts/commands/start.sh" "$@"
-        ;;
-
-    stop)
-        exec "$DOCKSIDE_HOME/scripts/commands/stop.sh" "$@"
-        ;;
-
-    install)
-        exec "$DOCKSIDE_HOME/scripts/commands/install.sh" "$@"
-        ;;
-
-    remove)
-        exec "$DOCKSIDE_HOME/scripts/commands/remove.sh" "$@"
-        ;;
-
-    use)
-        exec "$DOCKSIDE_HOME/scripts/commands/use.sh" "$@"
-        ;;
-
-    status)
-        exec "$DOCKSIDE_HOME/scripts/commands/status.sh" "$@"
-        ;;
-
-    logs)
-        exec "$DOCKSIDE_HOME/scripts/commands/logs.sh" "$@"
-        ;;
-
-    doctor)
-        exec "$DOCKSIDE_HOME/scripts/commands/doctor.sh" "$@"
-        ;;
-
-    backup)
-        exec "$DOCKSIDE_HOME/scripts/commands/backup.sh" "$@"
-        ;;
-
-    restore)
-        exec "$DOCKSIDE_HOME/scripts/commands/restore.sh" "$@"
-        ;;
-
-    update)
-        exec "$DOCKSIDE_HOME/scripts/commands/update.sh" "$@"
-        ;;
-
-    version)
-        cat "$DOCKSIDE_HOME/VERSION"
-        ;;
-
-    help|-h|--help|"")
-        cat <<HELP
+case "$CMD" in
+  init|start|stop)
+    exec "$DOCKSIDE_HOME/scripts/commands/$CMD.sh" "$@"
+    ;;
+  version)
+    cat "$DOCKSIDE_HOME/VERSION"
+    ;;
+  help|-h|--help|"")
+    cat <<HELP
 Dockside 1.0
 
-Commands
-
+Commands:
+  init
   start
   stop
-  install
-  remove
-  use
-  status
-  logs
-  doctor
-  backup
-  restore
-  update
   version
 HELP
-        ;;
-
-    *)
-        echo "Unknown command: $COMMAND" >&2
-        exit 1
-        ;;
-
+    ;;
+  *)
+    echo "Unknown command: $CMD" >&2
+    exit 1
+    ;;
 esac

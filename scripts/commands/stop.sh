@@ -1,2 +1,6 @@
 #!/bin/sh
-echo "stop: not implemented yet"
+set -eu
+
+. "$DOCKSIDE_HOME/scripts/lib/platform.sh"
+
+platform_stop

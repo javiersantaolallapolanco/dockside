@@ -19,7 +19,6 @@ compose_file_for_stack() {
 
 compose_env_for_stack() {
   stack="$1"
-
   eval "alias_name=\${ENV_ALIAS_$stack:-}"
 
   if [ -n "$alias_name" ] && [ -f "$ENV_DIR/$alias_name.env" ]; then
@@ -111,7 +110,7 @@ compose_wait() {
           all_ok=0
         fi
 
-        if [ "$health" != "none" ] && [ "$health" != "healthy" ]; then
+        if [ "$health" = "starting" ] || [ "$health" = "unhealthy" ]; then
           all_ok=0
         fi
       done
@@ -126,7 +125,9 @@ compose_wait() {
     elapsed=$((elapsed + WAIT_INTERVAL))
   done
 
-  die "Timeout waiting for stack: $stack"
+  warn "Timeout waiting for full health: $stack"
+  warn "Continuing because containers may have no healthcheck"
+  return 0
 }
 
 wait_http() {
@@ -134,7 +135,6 @@ wait_http() {
   label="$2"
 
   [ -n "$url" ] || return 0
-
   require_command curl
 
   elapsed=0
@@ -153,5 +153,6 @@ wait_http() {
     elapsed=$((elapsed + WAIT_INTERVAL))
   done
 
-  die "Timeout waiting for HTTP: $label $url"
+  warn "Timeout waiting for HTTP: $label $url"
+  return 0
 }

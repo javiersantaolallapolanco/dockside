@@ -7,48 +7,65 @@
 PLATFORM_FILE="$DOCKSIDE_INSTALL_DIR/platform.conf"
 
 platform_each_stack() {
+  require_file "$PLATFORM_FILE"
 
-    require_file "$PLATFORM_FILE"
+  while IFS= read -r stack
+  do
+    [ -n "$stack" ] || continue
+    case "$stack" in \#*) continue ;; esac
+    printf '%s\n' "$stack"
+  done < "$PLATFORM_FILE"
+}
 
-    while IFS= read -r stack
-    do
-        [ -n "$stack" ] || continue
-        printf '%s\n' "$stack"
-    done < "$PLATFORM_FILE"
+platform_key() {
+  printf '%s\n' "$1" | sed 's/-/_/g'
+}
 
+platform_wait() {
+  stack="$1"
+  key=$(platform_key "$stack")
+
+  eval "mode=\${WAIT_MODE_$key:-compose}"
+  eval "url=\${HEALTH_URL_$key:-}"
+
+  case "$mode" in
+    none)
+      info "Skipping wait for stack: $stack"
+      ;;
+    http)
+      wait_http "$url" "$stack"
+      ;;
+    compose|*)
+      compose_wait "$stack"
+      ;;
+  esac
 }
 
 platform_start() {
+  config_load
 
-    config_load
+  for stack in $(platform_each_stack)
+  do
+    compose_up "$stack"
+    platform_wait "$stack"
+  done
 
-    for stack in $(platform_each_stack)
-    do
-        compose_up "$stack"
-        compose_wait "$stack"
-    done
-
-    state_platform_up
-
-    info "Platform is UP"
-
+  state_platform_up
+  info "Platform is UP"
 }
 
 platform_stop() {
+  config_load
 
-    config_load
+  app_stop_current
 
-    app_stop_current
+  stacks="$(platform_each_stack)"
 
-    stacks="$(platform_each_stack)"
+  for stack in $(printf "%s\n" "$stacks" | awk '{a[NR]=$0} END{for(i=NR;i>=1;i--)print a[i]}')
+  do
+    compose_down "$stack"
+  done
 
-    for stack in $(printf "%s\n" "$stacks" | awk '{a[NR]=$0} END{for(i=NR;i>=1;i--)print a[i]}')
-    do
-        compose_down "$stack"
-    done
-
-    state_platform_down
-
-    info "Platform is DOWN"
-
+  state_platform_down
+  info "Platform is DOWN"
 }

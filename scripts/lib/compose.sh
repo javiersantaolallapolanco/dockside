@@ -20,6 +20,13 @@ compose_file_for_stack() {
 compose_env_for_stack() {
   stack="$1"
 
+  eval "alias_name=\${ENV_ALIAS_$stack:-}"
+
+  if [ -n "$alias_name" ] && [ -f "$ENV_DIR/$alias_name.env" ]; then
+    printf '%s\n' "$ENV_DIR/$alias_name.env"
+    return 0
+  fi
+
   if [ -f "$ENV_DIR/$stack.env" ]; then
     printf '%s\n' "$ENV_DIR/$stack.env"
     return 0

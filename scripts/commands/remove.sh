@@ -1,2 +1,6 @@
 #!/bin/sh
-echo "remove: not implemented yet"
+set -eu
+
+. "$DOCKSIDE_HOME/scripts/lib/remove.sh"
+
+app_remove "${1:-}" "${2:-}"

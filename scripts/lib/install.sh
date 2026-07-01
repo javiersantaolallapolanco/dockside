@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . "$DOCKSIDE_HOME/scripts/lib/config.sh"
+. "$DOCKSIDE_HOME/scripts/lib/apps_index.sh"
 
 app_validate_repo() {
   repo="$1"
@@ -49,6 +50,8 @@ app_install() {
       info "Copied env from: $ENV_DIR/$app.env"
     fi
   fi
+
+  apps_index_add "$app"
 
   info "Installed in: $target"
 }

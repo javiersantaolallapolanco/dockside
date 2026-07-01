@@ -2,6 +2,13 @@
 
 . "$DOCKSIDE_HOME/scripts/compose/compose.sh"
 . "$DOCKSIDE_HOME/scripts/core/state.sh"
+. "$DOCKSIDE_HOME/scripts/application/index.sh"
+
+app_require_installed() {
+  app="$1"
+
+  apps_index_has "$app" || die "Application is not installed: $app"
+}
 
 app_stop_current() {
   state_load
@@ -23,6 +30,8 @@ app_use() {
   state_load
 
   [ "${PLATFORM_STATUS:-DOWN}" = "UP" ] || die "Platform is not UP. Run: dockside start"
+
+  app_require_installed "$app"
 
   app_stop_current
 

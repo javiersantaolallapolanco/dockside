@@ -32,6 +32,7 @@ update_all() {
 }
 
 update_run() {
+  config_load
   target="${1:-all}"
 
   case "$target" in

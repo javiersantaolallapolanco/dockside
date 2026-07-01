@@ -16,28 +16,11 @@ platform_each_stack() {
   done < "$PLATFORM_FILE"
 }
 
-platform_key() {
-  printf '%s\n' "$1" | sed 's/-/_/g'
-}
 
 platform_wait() {
   stack="$1"
-  key=$(platform_key "$stack")
 
-  eval "mode=\${WAIT_MODE_$key:-compose}"
-  eval "url=\${HEALTH_URL_$key:-}"
-
-  case "$mode" in
-    none)
-      info "Skipping wait: $stack"
-      ;;
-    http)
-      wait_http "$url" "$stack"
-      ;;
-    compose|*)
-      compose_wait platform "$stack"
-      ;;
-  esac
+  compose_wait platform "$stack"
 }
 
 platform_start() {

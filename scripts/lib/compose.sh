@@ -25,12 +25,6 @@ compose_env_for_stack() {
     return 0
   fi
 
-  base=$(printf '%s\n' "$stack" | sed 's/[0-9].*$//')
-  if [ -n "$base" ] && [ -f "$ENV_DIR/$base.env" ]; then
-    printf '%s\n' "$ENV_DIR/$base.env"
-    return 0
-  fi
-
   if [ -f "$STACKS_DIR/$stack/.env" ]; then
     printf '%s\n' "$STACKS_DIR/$stack/.env"
     return 0
@@ -39,22 +33,33 @@ compose_env_for_stack() {
   printf '%s\n' ""
 }
 
+compose_cmd() {
+  stack="$1"
+  shift
+
+  compose_file=$(compose_file_for_stack "$stack")
+  env_file=$(compose_env_for_stack "$stack")
+
+  if [ -n "$env_file" ]; then
+    docker compose --env-file "$env_file" -f "$compose_file" "$@"
+  else
+    docker compose -f "$compose_file" "$@"
+  fi
+}
+
+compose_container_ids() {
+  stack="$1"
+  compose_cmd "$stack" ps -q
+}
+
 compose_up() {
   stack="$1"
   config_load
   require_command docker
   require_dir "$STACKS_DIR/$stack"
 
-  compose_file=$(compose_file_for_stack "$stack")
-  env_file=$(compose_env_for_stack "$stack")
-
   info "Starting stack: $stack"
-
-  if [ -n "$env_file" ]; then
-    docker compose --env-file "$env_file" -f "$compose_file" up -d
-  else
-    docker compose -f "$compose_file" up -d
-  fi
+  compose_cmd "$stack" up -d
 }
 
 compose_down() {
@@ -67,14 +72,79 @@ compose_down() {
     return 0
   fi
 
-  compose_file=$(compose_file_for_stack "$stack")
-  env_file=$(compose_env_for_stack "$stack")
-
   info "Stopping stack: $stack"
+  compose_cmd "$stack" down
+}
 
-  if [ -n "$env_file" ]; then
-    docker compose --env-file "$env_file" -f "$compose_file" down
-  else
-    docker compose -f "$compose_file" down
-  fi
+container_running() {
+  docker inspect -f '{{.State.Running}}' "$1" 2>/dev/null
+}
+
+container_health() {
+  docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$1" 2>/dev/null
+}
+
+compose_wait() {
+  stack="$1"
+  config_load
+
+  elapsed=0
+
+  while [ "$elapsed" -le "$WAIT_TIMEOUT" ]; do
+    ids=$(compose_container_ids "$stack" || true)
+
+    if [ -n "$ids" ]; then
+      all_ok=1
+
+      for id in $ids; do
+        running=$(container_running "$id")
+        health=$(container_health "$id")
+
+        if [ "$running" != "true" ]; then
+          all_ok=0
+        fi
+
+        if [ "$health" != "none" ] && [ "$health" != "healthy" ]; then
+          all_ok=0
+        fi
+      done
+
+      if [ "$all_ok" = "1" ]; then
+        info "Stack ready: $stack"
+        return 0
+      fi
+    fi
+
+    sleep "$WAIT_INTERVAL"
+    elapsed=$((elapsed + WAIT_INTERVAL))
+  done
+
+  die "Timeout waiting for stack: $stack"
+}
+
+wait_http() {
+  url="$1"
+  label="$2"
+
+  [ -n "$url" ] || return 0
+
+  require_command curl
+
+  elapsed=0
+
+  while [ "$elapsed" -le "$WAIT_TIMEOUT" ]; do
+    code=$(curl -s -o /dev/null -w '%{http_code}' "$url" || true)
+
+    case "$code" in
+      200|204|301|302|401|403)
+        info "HTTP ready: $label ($code)"
+        return 0
+        ;;
+    esac
+
+    sleep "$WAIT_INTERVAL"
+    elapsed=$((elapsed + WAIT_INTERVAL))
+  done
+
+  die "Timeout waiting for HTTP: $label $url"
 }

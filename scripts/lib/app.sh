@@ -1,6 +1,7 @@
 #!/bin/sh
 
-. "$DOCKSIDE_HOME/scripts/lib/compose.sh"
+. "$DOCKSIDE_HOME/scripts/lib/common.sh"
+. "$DOCKSIDE_HOME/scripts/lib/config.sh"
 . "$DOCKSIDE_HOME/scripts/lib/state.sh"
 
 app_dir() {
@@ -27,17 +28,10 @@ app_compose_file() {
 
 app_env_file() {
   app="$1"
-  config_load
+  dir=$(app_dir "$app")
 
-  eval "alias_name=\${ENV_ALIAS_$app:-}"
-
-  if [ -n "$alias_name" ] && [ -f "$ENV_DIR/$alias_name.env" ]; then
-    printf '%s\n' "$ENV_DIR/$alias_name.env"
-    return 0
-  fi
-
-  if [ -f "$ENV_DIR/$app.env" ]; then
-    printf '%s\n' "$ENV_DIR/$app.env"
+  if [ -f "$dir/.env" ]; then
+    printf '%s\n' "$dir/.env"
     return 0
   fi
 

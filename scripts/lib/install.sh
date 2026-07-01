@@ -38,5 +38,17 @@ app_install() {
 
   rm -rf "$target/.git" "$target/.github"
 
+  if [ ! -f "$target/.env" ]; then
+    eval "alias_name=\${ENV_ALIAS_$app:-}"
+
+    if [ -n "$alias_name" ] && [ -f "$ENV_DIR/$alias_name.env" ]; then
+      cp "$ENV_DIR/$alias_name.env" "$target/.env"
+      info "Copied env from: $ENV_DIR/$alias_name.env"
+    elif [ -f "$ENV_DIR/$app.env" ]; then
+      cp "$ENV_DIR/$app.env" "$target/.env"
+      info "Copied env from: $ENV_DIR/$app.env"
+    fi
+  fi
+
   info "Installed in: $target"
 }

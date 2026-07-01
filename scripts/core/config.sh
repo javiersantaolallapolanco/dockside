@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. "$DOCKSIDE_HOME/scripts/lib/common.sh"
+. "$DOCKSIDE_HOME/scripts/core/common.sh"
 
 DOCKSIDE_INSTALL_DIR="${DOCKSIDE_INSTALL_DIR:-/share/CACHEDEV1_DATA/docker/dockside}"
 DOCKSIDE_CONFIG_FILE="$DOCKSIDE_INSTALL_DIR/dockside.env"

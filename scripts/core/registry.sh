@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. "$DOCKSIDE_HOME/scripts/lib/config.sh"
+. "$DOCKSIDE_HOME/scripts/core/config.sh"
 
 registry_platform_dir() {
     printf '%s\n' "$STACKS_DIR"

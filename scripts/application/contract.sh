@@ -1,8 +1,8 @@
 #!/bin/sh
 
-. "$DOCKSIDE_HOME/scripts/lib/config.sh"
-. "$DOCKSIDE_HOME/scripts/lib/compose.sh"
-. "$DOCKSIDE_HOME/scripts/lib/registry.sh"
+. "$DOCKSIDE_HOME/scripts/core/config.sh"
+. "$DOCKSIDE_HOME/scripts/compose/compose.sh"
+. "$DOCKSIDE_HOME/scripts/core/registry.sh"
 
 app_contract_load() {
   app="$1"

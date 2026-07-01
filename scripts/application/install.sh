@@ -1,7 +1,7 @@
 #!/bin/sh
 
-. "$DOCKSIDE_HOME/scripts/lib/config.sh"
-. "$DOCKSIDE_HOME/scripts/lib/apps_index.sh"
+. "$DOCKSIDE_HOME/scripts/core/config.sh"
+. "$DOCKSIDE_HOME/scripts/application/index.sh"
 
 app_validate_repo() {
   repo="$1"

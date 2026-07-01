@@ -1,7 +1,7 @@
 #!/bin/sh
 
-. "$DOCKSIDE_HOME/scripts/lib/compose.sh"
-. "$DOCKSIDE_HOME/scripts/lib/state.sh"
+. "$DOCKSIDE_HOME/scripts/compose/compose.sh"
+. "$DOCKSIDE_HOME/scripts/core/state.sh"
 
 app_stop_current() {
   state_load

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. "$DOCKSIDE_HOME/scripts/lib/config.sh"
+. "$DOCKSIDE_HOME/scripts/core/config.sh"
 
 STATE_FILE="$DOCKSIDE_INSTALL_DIR/state.env"
 

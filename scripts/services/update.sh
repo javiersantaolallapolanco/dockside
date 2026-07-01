@@ -1,8 +1,8 @@
 #!/bin/sh
 
-. "$DOCKSIDE_HOME/scripts/lib/compose.sh"
-. "$DOCKSIDE_HOME/scripts/lib/apps_index.sh"
-. "$DOCKSIDE_HOME/scripts/lib/platform.sh"
+. "$DOCKSIDE_HOME/scripts/compose/compose.sh"
+. "$DOCKSIDE_HOME/scripts/application/index.sh"
+. "$DOCKSIDE_HOME/scripts/platform/platform.sh"
 
 update_target() {
   type="$1"

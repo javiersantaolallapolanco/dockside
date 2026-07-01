@@ -1,8 +1,8 @@
 #!/bin/sh
 
-. "$DOCKSIDE_HOME/scripts/lib/update.sh"
-. "$DOCKSIDE_HOME/scripts/lib/doctor.sh"
-. "$DOCKSIDE_HOME/scripts/lib/status.sh"
+. "$DOCKSIDE_HOME/scripts/services/update.sh"
+. "$DOCKSIDE_HOME/scripts/services/doctor.sh"
+. "$DOCKSIDE_HOME/scripts/services/status.sh"
 
 deploy_run() {
   app="${1:-}"

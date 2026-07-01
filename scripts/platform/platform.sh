@@ -1,7 +1,7 @@
 #!/bin/sh
 
-. "$DOCKSIDE_HOME/scripts/lib/compose.sh"
-. "$DOCKSIDE_HOME/scripts/lib/state.sh"
+. "$DOCKSIDE_HOME/scripts/compose/compose.sh"
+. "$DOCKSIDE_HOME/scripts/core/state.sh"
 
 PLATFORM_FILE="$DOCKSIDE_INSTALL_DIR/platform.conf"
 

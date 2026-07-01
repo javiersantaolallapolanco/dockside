@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-. "$DOCKSIDE_HOME/scripts/lib/install.sh"
+. "$DOCKSIDE_HOME/scripts/application/install.sh"
 
 repo="${1:-}"
 

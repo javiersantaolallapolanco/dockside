@@ -1,8 +1,8 @@
 #!/bin/sh
 
-. "$DOCKSIDE_HOME/scripts/lib/common.sh"
-. "$DOCKSIDE_HOME/scripts/lib/config.sh"
-. "$DOCKSIDE_HOME/scripts/lib/registry.sh"
+. "$DOCKSIDE_HOME/scripts/core/common.sh"
+. "$DOCKSIDE_HOME/scripts/core/config.sh"
+. "$DOCKSIDE_HOME/scripts/core/registry.sh"
 
 compose_env() {
     type="$1"

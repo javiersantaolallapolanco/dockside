@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
 
-. "$DOCKSIDE_HOME/scripts/lib/doctor.sh"
+. "$DOCKSIDE_HOME/scripts/services/doctor.sh"
 
 doctor_run

@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
 
-. "$DOCKSIDE_HOME/scripts/lib/logs.sh"
+. "$DOCKSIDE_HOME/scripts/services/logs.sh"
 
 logs_show "${1:-}"

@@ -1,7 +1,7 @@
 #!/bin/sh
 
-. "$DOCKSIDE_HOME/scripts/lib/app.sh"
-. "$DOCKSIDE_HOME/scripts/lib/apps_index.sh"
+. "$DOCKSIDE_HOME/scripts/application/app.sh"
+. "$DOCKSIDE_HOME/scripts/application/index.sh"
 
 app_remove() {
   app="$1"

@@ -1,9 +1,9 @@
 #!/bin/sh
 
-. "$DOCKSIDE_HOME/scripts/lib/platform.sh"
-. "$DOCKSIDE_HOME/scripts/lib/apps_index.sh"
-. "$DOCKSIDE_HOME/scripts/lib/app_contract.sh"
-. "$DOCKSIDE_HOME/scripts/lib/registry.sh"
+. "$DOCKSIDE_HOME/scripts/platform/platform.sh"
+. "$DOCKSIDE_HOME/scripts/application/index.sh"
+. "$DOCKSIDE_HOME/scripts/application/contract.sh"
+. "$DOCKSIDE_HOME/scripts/core/registry.sh"
 
 doctor_ok() {
   printf '[OK] %s\n' "$*"

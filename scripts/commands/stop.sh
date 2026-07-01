@@ -1,8 +1,8 @@
 #!/bin/sh
 set -eu
 
-. "$DOCKSIDE_HOME/scripts/lib/app.sh"
-. "$DOCKSIDE_HOME/scripts/lib/platform.sh"
+. "$DOCKSIDE_HOME/scripts/application/app.sh"
+. "$DOCKSIDE_HOME/scripts/platform/platform.sh"
 
 app_stop_current
 platform_stop

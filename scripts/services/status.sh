@@ -1,8 +1,8 @@
 #!/bin/sh
 
-. "$DOCKSIDE_HOME/scripts/lib/state.sh"
-. "$DOCKSIDE_HOME/scripts/lib/apps_index.sh"
-. "$DOCKSIDE_HOME/scripts/lib/platform.sh"
+. "$DOCKSIDE_HOME/scripts/core/state.sh"
+. "$DOCKSIDE_HOME/scripts/application/index.sh"
+. "$DOCKSIDE_HOME/scripts/platform/platform.sh"
 
 status_show() {
   state_load

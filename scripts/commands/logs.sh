@@ -1,2 +1,6 @@
 #!/bin/sh
-echo "logs: not implemented yet"
+set -eu
+
+. "$DOCKSIDE_HOME/scripts/lib/logs.sh"
+
+logs_show "${1:-}"

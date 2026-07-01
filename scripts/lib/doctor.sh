@@ -6,56 +6,46 @@ doctor_ok() {
   printf '[OK] %s\n' "$*"
 }
 
-doctor_check_command() {
-  command -v "$1" >/dev/null 2>&1 || die "Missing command: $1"
-  doctor_ok "Command: $1"
-}
+doctor_stack() {
+  type="$1"
+  name="$2"
 
-doctor_check_stack() {
-  stack="$1"
+  dir=$(compose_dir "$type" "$name")
+  require_dir "$dir"
+  compose_file "$dir" >/dev/null
 
-  require_dir "$STACKS_DIR/$stack"
-  compose_file_for_stack "$stack" >/dev/null
-
-  env_file=$(compose_env_for_stack "$stack")
-
-  doctor_ok "Stack: $stack"
-
-  if [ -n "$env_file" ]; then
-    doctor_ok "Env: $env_file"
-  else
-    warn "No env file for stack: $stack"
-  fi
+  doctor_ok "$type/$name"
 }
 
 doctor_run() {
   config_load
 
-  doctor_check_command docker
-  docker compose version >/dev/null 2>&1 || die "docker compose is not available"
-  doctor_ok "Docker Compose"
+  require_command docker
+  docker compose version >/dev/null 2>&1 || die "docker compose unavailable"
+
+  doctor_ok "docker"
+  doctor_ok "docker compose"
 
   require_dir "$DOCKER_ROOT"
   require_dir "$STACKS_DIR"
   require_dir "$ENV_DIR"
 
-  doctor_ok "Docker root: $DOCKER_ROOT"
-  doctor_ok "Stacks dir: $STACKS_DIR"
-  doctor_ok "Env dir: $ENV_DIR"
+  doctor_ok "DOCKER_ROOT=$DOCKER_ROOT"
+  doctor_ok "STACKS_DIR=$STACKS_DIR"
+  doctor_ok "ENV_DIR=$ENV_DIR"
 
   require_file "$PLATFORM_FILE"
-  doctor_ok "Platform file: $PLATFORM_FILE"
+  doctor_ok "PLATFORM_FILE=$PLATFORM_FILE"
 
   for stack in $(platform_each_stack); do
-    doctor_check_stack "$stack"
+    doctor_stack platform "$stack"
   done
 
   state_load
 
   if [ -n "${CURRENT_APP:-}" ]; then
-    doctor_check_stack "$CURRENT_APP"
+    doctor_stack app "$CURRENT_APP"
   fi
 
-  doctor_ok "State file: $STATE_FILE"
-  doctor_ok "Dockside installation is valid"
+  doctor_ok "STATE_FILE=$STATE_FILE"
 }

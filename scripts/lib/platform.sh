@@ -30,13 +30,13 @@ platform_wait() {
 
   case "$mode" in
     none)
-      info "Skipping wait for stack: $stack"
+      info "Skipping wait: $stack"
       ;;
     http)
       wait_http "$url" "$stack"
       ;;
     compose|*)
-      compose_wait "$stack"
+      compose_wait platform "$stack"
       ;;
   esac
 }
@@ -46,7 +46,8 @@ platform_start() {
 
   for stack in $(platform_each_stack)
   do
-    compose_up "$stack"
+    info "Starting stack: $stack"
+    compose_exec platform "$stack" up -d
     platform_wait "$stack"
   done
 
@@ -63,7 +64,8 @@ platform_stop() {
 
   for stack in $(printf "%s\n" "$stacks" | awk '{a[NR]=$0} END{for(i=NR;i>=1;i--)print a[i]}')
   do
-    compose_down "$stack"
+    info "Stopping stack: $stack"
+    compose_exec platform "$stack" down
   done
 
   state_platform_down

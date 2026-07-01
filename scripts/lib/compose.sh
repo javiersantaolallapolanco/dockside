@@ -1,122 +1,115 @@
 #!/bin/sh
+
 . "$DOCKSIDE_HOME/scripts/lib/config.sh"
 
-compose_file_for_stack() {
-  stack_dir="$STACKS_DIR/$1"
+compose_dir() {
+  type="$1"
+  name="$2"
 
-  if [ -f "$stack_dir/compose.yml" ]; then
-    printf '%s\n' "$stack_dir/compose.yml"
-    return 0
-  fi
+  config_load
 
-  if [ -f "$stack_dir/docker-compose.yml" ]; then
-    printf '%s\n' "$stack_dir/docker-compose.yml"
-    return 0
-  fi
-
-  die "No compose file found for stack: $1"
+  case "$type" in
+    platform)
+      printf '%s\n' "$STACKS_DIR/$name"
+      ;;
+    app)
+      printf '%s\n' "${APPS_DIR:-$DOCKER_ROOT/apps}/$name"
+      ;;
+    *)
+      die "Invalid compose type: $type"
+      ;;
+  esac
 }
 
-compose_env_for_stack() {
-  stack="$1"
-  eval "alias_name=\${ENV_ALIAS_$stack:-}"
+compose_file() {
+  dir="$1"
 
-  if [ -n "$alias_name" ] && [ -f "$ENV_DIR/$alias_name.env" ]; then
-    printf '%s\n' "$ENV_DIR/$alias_name.env"
+  if [ -f "$dir/compose.yml" ]; then
+    printf '%s\n' "$dir/compose.yml"
     return 0
   fi
 
-  if [ -f "$ENV_DIR/$stack.env" ]; then
-    printf '%s\n' "$ENV_DIR/$stack.env"
+  if [ -f "$dir/docker-compose.yml" ]; then
+    printf '%s\n' "$dir/docker-compose.yml"
     return 0
   fi
 
-  if [ -f "$STACKS_DIR/$stack/.env" ]; then
-    printf '%s\n' "$STACKS_DIR/$stack/.env"
+  die "Compose file not found: $dir"
+}
+
+compose_env() {
+  type="$1"
+  name="$2"
+  dir="$3"
+
+  if [ "$type" = "app" ] && [ -f "$dir/.env" ]; then
+    printf '%s\n' "$dir/.env"
+    return 0
+  fi
+
+  if [ -f "$ENV_DIR/$name.env" ]; then
+    printf '%s\n' "$ENV_DIR/$name.env"
+    return 0
+  fi
+
+  if [ -f "$dir/.env" ]; then
+    printf '%s\n' "$dir/.env"
     return 0
   fi
 
   printf '%s\n' ""
 }
 
-compose_cmd() {
-  stack="$1"
-  shift
+compose_exec() {
+  type="$1"
+  name="$2"
+  shift 2
 
-  compose_file=$(compose_file_for_stack "$stack")
-  env_file=$(compose_env_for_stack "$stack")
+  require_command docker
 
-  if [ -n "$env_file" ]; then
-    docker compose --env-file "$env_file" -f "$compose_file" "$@"
+  dir=$(compose_dir "$type" "$name")
+  require_dir "$dir"
+
+  file=$(compose_file "$dir")
+  env=$(compose_env "$type" "$name" "$dir")
+
+  if [ -n "$env" ]; then
+    docker compose --env-file "$env" -f "$file" "$@"
   else
-    docker compose -f "$compose_file" "$@"
+    docker compose -f "$file" "$@"
   fi
 }
 
-compose_container_ids() {
-  stack="$1"
-  compose_cmd "$stack" ps -q
-}
-
-compose_up() {
-  stack="$1"
-  config_load
-  require_command docker
-  require_dir "$STACKS_DIR/$stack"
-
-  info "Starting stack: $stack"
-  compose_cmd "$stack" up -d
-}
-
-compose_down() {
-  stack="$1"
-  config_load
-  require_command docker
-
-  if [ ! -d "$STACKS_DIR/$stack" ]; then
-    warn "Stack directory not found, skipping: $stack"
-    return 0
-  fi
-
-  info "Stopping stack: $stack"
-  compose_cmd "$stack" down
-}
-
-container_running() {
-  docker inspect -f '{{.State.Running}}' "$1" 2>/dev/null
-}
-
-container_health() {
-  docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$1" 2>/dev/null
+compose_ids() {
+  compose_exec "$1" "$2" ps -q
 }
 
 compose_wait() {
-  stack="$1"
-  config_load
+  type="$1"
+  name="$2"
 
+  config_load
   elapsed=0
 
   while [ "$elapsed" -le "$WAIT_TIMEOUT" ]; do
-    ids=$(compose_container_ids "$stack" || true)
+    ids=$(compose_ids "$type" "$name" || true)
 
     if [ -n "$ids" ]; then
-      all_ok=1
+      ok=1
 
       for id in $ids; do
-        running=$(container_running "$id")
-        health=$(container_health "$id")
+        running=$(docker inspect -f '{{.State.Running}}' "$id" 2>/dev/null || echo false)
+        health=$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$id" 2>/dev/null || echo none)
 
-        if [ "$running" != "true" ]; then
-          all_ok=0
-        fi
+        [ "$running" = "true" ] || ok=0
 
         if [ "$health" = "starting" ] || [ "$health" = "unhealthy" ]; then
-          all_ok=0
+          ok=0
         fi
       done
 
-      if [ "$all_ok" = "1" ]; then
-        info "Stack ready: $stack"
+      if [ "$ok" = "1" ]; then
+        info "Ready: $type/$name"
         return 0
       fi
     fi
@@ -125,8 +118,7 @@ compose_wait() {
     elapsed=$((elapsed + WAIT_INTERVAL))
   done
 
-  warn "Timeout waiting for full health: $stack"
-  warn "Continuing because containers may have no healthcheck"
+  warn "Timeout waiting: $type/$name"
   return 0
 }
 
@@ -153,6 +145,6 @@ wait_http() {
     elapsed=$((elapsed + WAIT_INTERVAL))
   done
 
-  warn "Timeout waiting for HTTP: $label $url"
+  warn "HTTP timeout: $label"
   return 0
 }

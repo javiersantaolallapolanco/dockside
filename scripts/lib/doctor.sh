@@ -1,5 +1,6 @@
 #!/bin/sh
-. "$DOCKSIDE_HOME/scripts/lib/app.sh"
+
+. "$DOCKSIDE_HOME/scripts/lib/platform.sh"
 
 doctor_ok() {
   printf '[OK] %s\n' "$*"
@@ -31,20 +32,23 @@ doctor_run() {
   config_load
 
   doctor_check_command docker
-
   docker compose version >/dev/null 2>&1 || die "docker compose is not available"
   doctor_ok "Docker Compose"
 
   require_dir "$DOCKER_ROOT"
   require_dir "$STACKS_DIR"
   require_dir "$ENV_DIR"
+
   doctor_ok "Docker root: $DOCKER_ROOT"
   doctor_ok "Stacks dir: $STACKS_DIR"
   doctor_ok "Env dir: $ENV_DIR"
 
-  doctor_check_stack "$TRAEFIK_STACK"
-  doctor_check_stack "$SUPABASE_STACK"
-  doctor_check_stack "$RUNNER_STACK"
+  require_file "$PLATFORM_FILE"
+  doctor_ok "Platform file: $PLATFORM_FILE"
+
+  for stack in $(platform_each_stack); do
+    doctor_check_stack "$stack"
+  done
 
   state_load
 

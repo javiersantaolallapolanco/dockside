@@ -9,6 +9,39 @@ doctor_ok() {
   printf '[OK] %s\n' "$*"
 }
 
+doctor_first_ghcr_image() {
+  for file in "$DOCKER_ROOT"/apps/*/.env; do
+    [ -f "$file" ] || continue
+    image=$(grep '^GHCR_IMAGE=' "$file" | head -n 1 | cut -d '=' -f 2-)
+    [ -n "$image" ] && printf '%s\n' "$image" && return 0
+  done
+
+  return 1
+}
+
+doctor_runner_ghcr() {
+  RUNNER_CONTAINER="${RUNNER_CONTAINER:-dockside-runner}"
+
+  docker ps --format '{{.Names}}' | grep -qx "$RUNNER_CONTAINER" || return 0
+
+  docker exec "$RUNNER_CONTAINER" test -f /root/.docker/config.json || \
+    die "$RUNNER_CONTAINER cannot access /root/.docker/config.json"
+
+  docker exec "$RUNNER_CONTAINER" grep -q 'ghcr.io' /root/.docker/config.json || \
+    die "$RUNNER_CONTAINER docker config does not contain ghcr.io credentials"
+
+  doctor_ok "$RUNNER_CONTAINER docker credentials"
+
+  image=$(doctor_first_ghcr_image || true)
+
+  if [ -n "$image" ]; then
+    docker exec "$RUNNER_CONTAINER" docker pull "$image" >/dev/null || \
+      die "$RUNNER_CONTAINER cannot pull $image"
+
+    doctor_ok "$RUNNER_CONTAINER GHCR pull"
+  fi
+}
+
 doctor_stack() {
   type="$1"
   name="$2"
@@ -43,6 +76,8 @@ doctor_run() {
   for stack in $(platform_each_stack); do
     doctor_stack platform "$stack"
   done
+
+  doctor_runner_ghcr
 
   for app in $(apps_index_list); do
     app_contract_validate "$app"

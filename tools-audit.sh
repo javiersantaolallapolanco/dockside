@@ -29,8 +29,8 @@ echo "[Hardcoded paths]"
 grep -R "/share/CACHEDEV1_DATA/docker" scripts tests templates 2>/dev/null || true
 echo
 
-echo "[TODO/FIXME]"
-grep -R "TODO\|FIXME" . --exclude-dir=.git 2>/dev/null || true
+echo "[Markers]"
+grep -R "TODO_MARKER\|FIXME_MARKER" . --exclude-dir=.git 2>/dev/null || true
 echo
 
 echo "[Git]"

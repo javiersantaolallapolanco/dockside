@@ -1,15 +1,16 @@
 #!/bin/sh
 
-. "$DOCKSIDE_HOME/scripts/lib/platform.sh"
+. "$DOCKSIDE_HOME/scripts/lib/compose.sh"
 . "$DOCKSIDE_HOME/scripts/lib/apps_index.sh"
+. "$DOCKSIDE_HOME/scripts/lib/platform.sh"
 
 update_target() {
   type="$1"
   name="$2"
 
   info "Updating $type: $name"
-  compose_exec "$type" "$name" pull
-  compose_exec "$type" "$name" up -d
+  compose_pull "$type" "$name"
+  compose_up "$type" "$name"
 
   if [ "$type" = "platform" ]; then
     platform_wait "$name"
@@ -53,7 +54,7 @@ update_run() {
         return 0
       fi
 
-      if [ -d "$STACKS_DIR/$target" ]; then
+      if registry_exists platform "$target"; then
         update_target platform "$target"
         return 0
       fi

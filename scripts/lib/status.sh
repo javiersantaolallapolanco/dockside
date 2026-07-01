@@ -1,7 +1,6 @@
 #!/bin/sh
 
 . "$DOCKSIDE_HOME/scripts/lib/state.sh"
-. "$DOCKSIDE_HOME/scripts/lib/config.sh"
 . "$DOCKSIDE_HOME/scripts/lib/apps_index.sh"
 . "$DOCKSIDE_HOME/scripts/lib/platform.sh"
 

@@ -2,7 +2,6 @@
 
 . "$DOCKSIDE_HOME/scripts/lib/compose.sh"
 . "$DOCKSIDE_HOME/scripts/lib/state.sh"
-. "$DOCKSIDE_HOME/scripts/lib/app.sh"
 
 PLATFORM_FILE="$DOCKSIDE_INSTALL_DIR/platform.conf"
 
@@ -47,7 +46,7 @@ platform_start() {
   for stack in $(platform_each_stack)
   do
     info "Starting stack: $stack"
-    compose_exec platform "$stack" up -d
+    compose_up platform "$stack"
     platform_wait "$stack"
   done
 
@@ -58,14 +57,12 @@ platform_start() {
 platform_stop() {
   config_load
 
-  app_stop_current
-
   stacks="$(platform_each_stack)"
 
   for stack in $(printf "%s\n" "$stacks" | awk '{a[NR]=$0} END{for(i=NR;i>=1;i--)print a[i]}')
   do
     info "Stopping stack: $stack"
-    compose_exec platform "$stack" down
+    compose_down platform "$stack"
   done
 
   state_platform_down

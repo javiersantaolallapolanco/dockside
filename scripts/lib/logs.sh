@@ -1,5 +1,7 @@
 #!/bin/sh
+
 . "$DOCKSIDE_HOME/scripts/lib/app.sh"
+. "$DOCKSIDE_HOME/scripts/lib/compose.sh"
 
 logs_show() {
   target="${1:-}"
@@ -11,16 +13,17 @@ logs_show() {
     target="${CURRENT_APP:-}"
   fi
 
-  [ -n "$target" ] || die "Missing stack name and no current app configured"
+  [ -n "$target" ] || die "Missing stack/app name and no current app configured"
 
-  require_dir "$STACKS_DIR/$target"
-
-  compose_file=$(compose_file_for_stack "$target")
-  env_file=$(compose_env_for_stack "$target")
-
-  if [ -n "$env_file" ]; then
-    docker compose --env-file "$env_file" -f "$compose_file" logs --tail=200
-  else
-    docker compose -f "$compose_file" logs --tail=200
+  if [ -d "${APPS_DIR:-$DOCKER_ROOT/apps}/$target" ]; then
+    app_compose "$target" logs --tail=200
+    return 0
   fi
+
+  if [ -d "$STACKS_DIR/$target" ]; then
+    compose_cmd "$target" logs --tail=200
+    return 0
+  fi
+
+  die "Unknown app or stack: $target"
 }

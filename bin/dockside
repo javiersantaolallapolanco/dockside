@@ -19,23 +19,29 @@ case "$CMD" in
     cat "$DOCKSIDE_HOME/VERSION"
     ;;
   help|-h|--help|"")
-    cat <<HELP
-Dockside 1.0
+cat <<HELP
+Dockside 0.9
 
-Commands:
+Commands
+
   init
   start
   stop
+
+  install
+  remove
+  use
+
+  deploy
+  update
+
   status
-  install <repo>
-  remove <app> [--delete-data]
-  use <app>
-  logs [app|stack]
   doctor
-  update [all|platform|apps|name]
-  deploy <app>
+  logs
+
   test
   version
+
 HELP
     ;;
   *)

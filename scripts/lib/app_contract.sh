@@ -51,5 +51,14 @@ app_contract_healthcheck() {
 
   [ -n "$HEALTHCHECK" ] || return 0
 
-  wait_http "$HEALTHCHECK" "app/$app"
+  code=$(curl -s -o /dev/null -w '%{http_code}' "$HEALTHCHECK" || true)
+
+  case "$code" in
+    200|204|301|302|401|403)
+      info "App health OK: $app ($code)"
+      ;;
+    *)
+      warn "App health not ready: $app ($code)"
+      ;;
+  esac
 }

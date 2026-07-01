@@ -2,15 +2,11 @@
 
 . "$DOCKSIDE_HOME/scripts/lib/config.sh"
 . "$DOCKSIDE_HOME/scripts/lib/compose.sh"
-
-app_contract_file() {
-  app="$1"
-  printf '%s\n' "${APPS_DIR:-$DOCKER_ROOT/apps}/$app/app.env"
-}
+. "$DOCKSIDE_HOME/scripts/lib/registry.sh"
 
 app_contract_load() {
   app="$1"
-  dir="${APPS_DIR:-$DOCKER_ROOT/apps}/$app"
+  dir=$(registry_dir app "$app")
 
   NAME=
   DISPLAY_NAME=
@@ -28,7 +24,7 @@ app_contract_validate() {
 
   config_load
 
-  dir="${APPS_DIR:-$DOCKER_ROOT/apps}/$app"
+  dir=$(registry_dir app "$app")
   require_dir "$dir"
 
   [ -f "$dir/compose.yml" ] || [ -f "$dir/docker-compose.yml" ] || die "App $app: missing compose.yml"
@@ -42,7 +38,7 @@ app_contract_validate() {
   [ -n "$DISPLAY_NAME" ] || die "App $app: DISPLAY_NAME missing"
   [ -n "$TYPE" ] || die "App $app: TYPE missing"
 
-  compose_file "$(compose_dir app "$app")" >/dev/null
+  registry_compose "$dir" >/dev/null
 
   info "App contract OK: $app"
 }

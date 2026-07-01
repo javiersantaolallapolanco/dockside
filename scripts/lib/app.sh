@@ -1,60 +1,102 @@
 #!/bin/sh
+
 . "$DOCKSIDE_HOME/scripts/lib/compose.sh"
 . "$DOCKSIDE_HOME/scripts/lib/state.sh"
 
-app_require() {
-  app="$1"
+app_dir() {
+    config_load
+    printf '%s\n' "${APPS_DIR:-$DOCKER_ROOT/apps}/$1"
+}
 
-  [ -n "$app" ] || die "Missing app name"
-  require_dir "$STACKS_DIR/$app"
-  compose_file_for_stack "$app" >/dev/null
+app_compose_file() {
+
+    app="$1"
+    dir=$(app_dir "$app")
+
+    if [ -f "$dir/compose.yml" ]; then
+        printf '%s\n' "$dir/compose.yml"
+        return
+    fi
+
+    if [ -f "$dir/docker-compose.yml" ]; then
+        printf '%s\n' "$dir/docker-compose.yml"
+        return
+    fi
+
+    die "Compose not found for app: $app"
+}
+
+app_env_file() {
+
+    app="$1"
+
+    eval "alias=\${ENV_ALIAS_$app:-}"
+
+    if [ -n "$alias" ] && [ -f "$ENV_DIR/$alias.env" ]; then
+        printf '%s\n' "$ENV_DIR/$alias.env"
+        return
+    fi
+
+    if [ -f "$ENV_DIR/$app.env" ]; then
+        printf '%s\n' "$ENV_DIR/$app.env"
+        return
+    fi
+
+    printf '%s\n' ""
+}
+
+app_compose() {
+
+    app="$1"
+    shift
+
+    compose=$(app_compose_file "$app")
+    env=$(app_env_file "$app")
+
+    if [ -n "$env" ]; then
+        docker compose \
+            --env-file "$env" \
+            -f "$compose" \
+            "$@"
+    else
+        docker compose \
+            -f "$compose" \
+            "$@"
+    fi
+
 }
 
 app_stop_current() {
-  state_load
 
-  if [ -z "${CURRENT_APP:-}" ]; then
-    info "No current app configured"
-    return 0
-  fi
+    state_load
 
-  if [ ! -d "$STACKS_DIR/$CURRENT_APP" ]; then
-    warn "Current app stack not found, skipping: $CURRENT_APP"
+    [ -n "${CURRENT_APP:-}" ] || return 0
+
+    info "Stopping app: $CURRENT_APP"
+
+    app_compose "$CURRENT_APP" down || true
+
     CURRENT_APP_STATUS=DOWN
+
     state_save
-    return 0
-  fi
 
-  compose_down "$CURRENT_APP"
-
-  CURRENT_APP_STATUS=DOWN
-  state_save
 }
 
 app_use() {
-  app="$1"
 
-  config_load
-  app_require "$app"
-  state_load
+    app="$1"
 
-  if [ "${PLATFORM_STATUS:-DOWN}" != "UP" ]; then
-    die "Platform is not UP. Run: dockside start"
-  fi
+    state_load
 
-  if [ "${CURRENT_APP:-}" = "$app" ] && [ "${CURRENT_APP_STATUS:-DOWN}" = "UP" ]; then
-    info "App already active: $app"
-    return 0
-  fi
+    app_stop_current
 
-  app_stop_current
+    info "Starting app: $app"
 
-  compose_up "$app"
+    app_compose "$app" up -d
 
-  state_load
-  CURRENT_APP="$app"
-  CURRENT_APP_STATUS=UP
-  state_save
+    CURRENT_APP="$app"
+    CURRENT_APP_STATUS=UP
 
-  info "Current app is now: $app"
+    state_save
+
 }

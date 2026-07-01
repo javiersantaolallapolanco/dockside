@@ -3,6 +3,7 @@
 . "$DOCKSIDE_HOME/scripts/lib/platform.sh"
 . "$DOCKSIDE_HOME/scripts/lib/apps_index.sh"
 . "$DOCKSIDE_HOME/scripts/lib/app_contract.sh"
+. "$DOCKSIDE_HOME/scripts/lib/registry.sh"
 
 doctor_ok() {
   printf '[OK] %s\n' "$*"
@@ -12,9 +13,9 @@ doctor_stack() {
   type="$1"
   name="$2"
 
-  dir=$(compose_dir "$type" "$name")
+  dir=$(registry_dir "$type" "$name")
   require_dir "$dir"
-  compose_file "$dir" >/dev/null
+  registry_compose "$dir" >/dev/null
 
   doctor_ok "$type/$name"
 }

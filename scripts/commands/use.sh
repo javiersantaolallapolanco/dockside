@@ -1,2 +1,7 @@
 #!/bin/sh
-echo "use: not implemented yet"
+set -eu
+
+. "$DOCKSIDE_HOME/scripts/lib/app.sh"
+
+app="${1:-}"
+app_use "$app"

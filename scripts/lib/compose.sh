@@ -18,13 +18,25 @@ compose_file_for_stack() {
 }
 
 compose_env_for_stack() {
-  env_file="$ENV_DIR/$1.env"
+  stack="$1"
 
-  if [ -f "$env_file" ]; then
-    printf '%s\n' "$env_file"
-  else
-    printf '%s\n' ""
+  if [ -f "$ENV_DIR/$stack.env" ]; then
+    printf '%s\n' "$ENV_DIR/$stack.env"
+    return 0
   fi
+
+  base=$(printf '%s\n' "$stack" | sed 's/[0-9].*$//')
+  if [ -n "$base" ] && [ -f "$ENV_DIR/$base.env" ]; then
+    printf '%s\n' "$ENV_DIR/$base.env"
+    return 0
+  fi
+
+  if [ -f "$STACKS_DIR/$stack/.env" ]; then
+    printf '%s\n' "$STACKS_DIR/$stack/.env"
+    return 0
+  fi
+
+  printf '%s\n' ""
 }
 
 compose_up() {

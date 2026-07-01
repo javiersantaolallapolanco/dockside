@@ -1,6 +1,8 @@
 #!/bin/sh
 
 . "$DOCKSIDE_HOME/scripts/lib/platform.sh"
+. "$DOCKSIDE_HOME/scripts/lib/apps_index.sh"
+. "$DOCKSIDE_HOME/scripts/lib/app_contract.sh"
 
 doctor_ok() {
   printf '[OK] %s\n' "$*"
@@ -41,11 +43,11 @@ doctor_run() {
     doctor_stack platform "$stack"
   done
 
-  state_load
+  for app in $(apps_index_list); do
+    app_contract_validate "$app"
+  done
 
-  if [ -n "${CURRENT_APP:-}" ]; then
-    doctor_stack app "$CURRENT_APP"
-  fi
+  state_load
 
   doctor_ok "STATE_FILE=$STATE_FILE"
 }

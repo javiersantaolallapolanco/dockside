@@ -1,41 +1,45 @@
 #!/bin/sh
 set -eu
 
-SELF_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-DOCKSIDE_ROOT="$(CDPATH= cd -- "$SELF_DIR/.." && pwd)"
-export DOCKSIDE_ROOT
-
-. "$DOCKSIDE_ROOT/core/bootstrap/bootstrap.sh"
-. "$DOCKSIDE_ROOT/core/command/command.sh"
-
-bootstrap_init
+SELF_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+DOCKSIDE_HOME=$(CDPATH= cd -- "$SELF_DIR/.." && pwd)
+export DOCKSIDE_HOME
 
 CMD="${1:-help}"
 [ "$#" -gt 0 ] && shift
 
 case "$CMD" in
-    help|-h|--help)
-        cat <<HELP
-Dockside
+  init|start|stop|status|use|doctor|logs|install|remove|update|deploy)
+    exec "$DOCKSIDE_HOME/scripts/commands/$CMD.sh" "$@"
+    ;;
+  test)
+    exec "$DOCKSIDE_HOME/tests/run.sh"
+    ;;
+  version)
+    cat "$DOCKSIDE_HOME/VERSION"
+    ;;
+  help|-h|--help|"")
+    cat <<HELP
+Dockside 1.0
 
-Commands
-
+Commands:
   init
-  doctor
-  check
+  start
+  stop
   status
-  deploy
-  backup
-  app
-  restore
-  update
+  install <repo>
+  remove <app> [--delete-data]
+  use <app>
+  logs [app|stack]
+  doctor
+  update [all|platform|apps|name]
+  deploy <app>
+  test
   version
 HELP
-        ;;
-    version)
-        cat "$DOCKSIDE_ROOT/VERSION"
-        ;;
-    *)
-        command_run "$CMD" "$@"
-        ;;
+    ;;
+  *)
+    echo "Unknown command: $CMD" >&2
+    exit 1
+    ;;
 esac

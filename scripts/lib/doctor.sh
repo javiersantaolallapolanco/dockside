@@ -49,5 +49,10 @@ doctor_run() {
 
   state_load
 
+  if [ "${CURRENT_APP_STATUS:-DOWN}" = "UP" ] && [ -n "${CURRENT_APP:-}" ]; then
+    app_contract_healthcheck "$CURRENT_APP"
+  fi
+
   doctor_ok "STATE_FILE=$STATE_FILE"
+  doctor_ok "Dockside doctor completed"
 }

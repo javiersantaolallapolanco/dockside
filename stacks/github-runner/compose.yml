@@ -1,0 +1,21 @@
+services:
+  github-runner:
+    image: myoung34/github-runner:latest
+    container_name: dockside-runner
+    restart: unless-stopped
+
+    environment:
+      REPO_URL: https://github.com/javiersantaolallapolanco/mundial2026
+      RUNNER_NAME: qnap-dockside
+      RUNNER_SCOPE: repo
+      LABELS: qnap,docker,dockside
+      RUNNER_WORKDIR: /tmp/runner/work
+
+    env_file:
+      - /share/CACHEDEV1_DATA/docker/env/github-runner.env
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /share/CACHEDEV1_DATA/docker:/share/CACHEDEV1_DATA/docker
+      - /etc/config/ssh:/root/.ssh:ro
+      - /share/CACHEDEV1_DATA/.qpkg/container-station/homes/admin/.docker:/root/.docker:ro

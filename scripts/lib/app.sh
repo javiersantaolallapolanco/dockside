@@ -4,99 +4,95 @@
 . "$DOCKSIDE_HOME/scripts/lib/state.sh"
 
 app_dir() {
-    config_load
-    printf '%s\n' "${APPS_DIR:-$DOCKER_ROOT/apps}/$1"
+  config_load
+  printf '%s\n' "${APPS_DIR:-$DOCKER_ROOT/apps}/$1"
 }
 
 app_compose_file() {
+  app="$1"
+  dir=$(app_dir "$app")
 
-    app="$1"
-    dir=$(app_dir "$app")
+  if [ -f "$dir/compose.yml" ]; then
+    printf '%s\n' "$dir/compose.yml"
+    return 0
+  fi
 
-    if [ -f "$dir/compose.yml" ]; then
-        printf '%s\n' "$dir/compose.yml"
-        return
-    fi
+  if [ -f "$dir/docker-compose.yml" ]; then
+    printf '%s\n' "$dir/docker-compose.yml"
+    return 0
+  fi
 
-    if [ -f "$dir/docker-compose.yml" ]; then
-        printf '%s\n' "$dir/docker-compose.yml"
-        return
-    fi
-
-    die "Compose not found for app: $app"
+  die "Compose not found for app: $app"
 }
 
 app_env_file() {
+  app="$1"
+  config_load
 
-    app="$1"
+  eval "alias_name=\${ENV_ALIAS_$app:-}"
 
-    eval "alias=\${ENV_ALIAS_$app:-}"
+  if [ -n "$alias_name" ] && [ -f "$ENV_DIR/$alias_name.env" ]; then
+    printf '%s\n' "$ENV_DIR/$alias_name.env"
+    return 0
+  fi
 
-    if [ -n "$alias" ] && [ -f "$ENV_DIR/$alias.env" ]; then
-        printf '%s\n' "$ENV_DIR/$alias.env"
-        return
-    fi
+  if [ -f "$ENV_DIR/$app.env" ]; then
+    printf '%s\n' "$ENV_DIR/$app.env"
+    return 0
+  fi
 
-    if [ -f "$ENV_DIR/$app.env" ]; then
-        printf '%s\n' "$ENV_DIR/$app.env"
-        return
-    fi
-
-    printf '%s\n' ""
+  printf '%s\n' ""
 }
 
 app_compose() {
+  app="$1"
+  shift
 
-    app="$1"
-    shift
+  config_load
+  require_command docker
 
-    compose=$(app_compose_file "$app")
-    env=$(app_env_file "$app")
+  compose=$(app_compose_file "$app")
+  env=$(app_env_file "$app")
 
-    if [ -n "$env" ]; then
-        docker compose \
-            --env-file "$env" \
-            -f "$compose" \
-            "$@"
-    else
-        docker compose \
-            -f "$compose" \
-            "$@"
-    fi
-
+  if [ -n "$env" ]; then
+    docker compose --env-file "$env" -f "$compose" "$@"
+  else
+    docker compose -f "$compose" "$@"
+  fi
 }
 
 app_stop_current() {
+  state_load
 
-    state_load
+  [ -n "${CURRENT_APP:-}" ] || return 0
 
-    [ -n "${CURRENT_APP:-}" ] || return 0
+  info "Stopping app: $CURRENT_APP"
+  app_compose "$CURRENT_APP" down || true
 
-    info "Stopping app: $CURRENT_APP"
-
-    app_compose "$CURRENT_APP" down || true
-
-    CURRENT_APP_STATUS=DOWN
-
-    state_save
-
+  CURRENT_APP_STATUS=DOWN
+  state_save
 }
 
 app_use() {
+  app="$1"
 
-    app="$1"
+  [ -n "$app" ] || die "Usage: dockside use <app>"
 
-    state_load
+  state_load
 
-    app_stop_current
+  if [ "${PLATFORM_STATUS:-DOWN}" != "UP" ]; then
+    die "Platform is not UP. Run: dockside start"
+  fi
 
-    info "Starting app: $app"
+  app_stop_current
 
-    app_compose "$app" up -d
+  info "Starting app: $app"
+  app_compose "$app" up -d
 
-    CURRENT_APP="$app"
-    CURRENT_APP_STATUS=UP
+  state_load
+  CURRENT_APP="$app"
+  CURRENT_APP_STATUS=UP
+  state_save
 
-    state_save
-
+  info "Current app is now: $app"
 }

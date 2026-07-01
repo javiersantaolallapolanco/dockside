@@ -12,6 +12,9 @@ case "$CMD" in
   init|start|stop|status|use|doctor|logs|install|remove|update)
     exec "$DOCKSIDE_HOME/scripts/commands/$CMD.sh" "$@"
     ;;
+  test)
+    exec "$DOCKSIDE_HOME/tests/run.sh"
+    ;;
   version)
     cat "$DOCKSIDE_HOME/VERSION"
     ;;
@@ -30,6 +33,7 @@ Commands:
   logs [app|stack]
   doctor
   update [all|platform|apps|name]
+  test
   version
 HELP
     ;;

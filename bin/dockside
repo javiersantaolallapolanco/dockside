@@ -9,7 +9,7 @@ CMD="${1:-help}"
 [ "$#" -gt 0 ] && shift
 
 case "$CMD" in
-  init|start|stop)
+  init|start|stop|status)
     exec "$DOCKSIDE_HOME/scripts/commands/$CMD.sh" "$@"
     ;;
   version)
@@ -23,6 +23,7 @@ Commands:
   init
   start
   stop
+  status
   version
 HELP
     ;;

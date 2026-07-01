@@ -1,2 +1,6 @@
 #!/bin/sh
-echo "status: not implemented yet"
+set -eu
+
+. "$DOCKSIDE_HOME/scripts/lib/status.sh"
+
+status_show

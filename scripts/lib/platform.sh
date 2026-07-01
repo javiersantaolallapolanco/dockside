@@ -1,6 +1,7 @@
 #!/bin/sh
 . "$DOCKSIDE_HOME/scripts/lib/compose.sh"
 . "$DOCKSIDE_HOME/scripts/lib/state.sh"
+. "$DOCKSIDE_HOME/scripts/lib/app.sh"
 
 platform_start() {
   config_load
@@ -15,6 +16,8 @@ platform_start() {
 
 platform_stop() {
   config_load
+
+  app_stop_current
 
   compose_down "$RUNNER_STACK"
   compose_down "$SUPABASE_STACK"

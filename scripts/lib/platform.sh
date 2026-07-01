@@ -1,36 +1,54 @@
 #!/bin/sh
+
 . "$DOCKSIDE_HOME/scripts/lib/compose.sh"
 . "$DOCKSIDE_HOME/scripts/lib/state.sh"
 . "$DOCKSIDE_HOME/scripts/lib/app.sh"
 
+PLATFORM_FILE="$DOCKSIDE_INSTALL_DIR/platform.conf"
+
+platform_each_stack() {
+
+    require_file "$PLATFORM_FILE"
+
+    while IFS= read -r stack
+    do
+        [ -n "$stack" ] || continue
+        printf '%s\n' "$stack"
+    done < "$PLATFORM_FILE"
+
+}
+
 platform_start() {
-  config_load
 
-  compose_up "$TRAEFIK_STACK"
-  compose_wait "$TRAEFIK_STACK"
-  wait_http "${TRAEFIK_HEALTH_URL:-}" "$TRAEFIK_STACK"
+    config_load
 
-  compose_up "$SUPABASE_STACK"
-  compose_wait "$SUPABASE_STACK"
-  wait_http "${SUPABASE_HEALTH_URL:-}" "$SUPABASE_STACK"
+    for stack in $(platform_each_stack)
+    do
+        compose_up "$stack"
+        compose_wait "$stack"
+    done
 
-  compose_up "$RUNNER_STACK"
-  compose_wait "$RUNNER_STACK"
-  wait_http "${RUNNER_HEALTH_URL:-}" "$RUNNER_STACK"
+    state_platform_up
 
-  state_platform_up
-  info "Platform is UP"
+    info "Platform is UP"
+
 }
 
 platform_stop() {
-  config_load
 
-  app_stop_current
+    config_load
 
-  compose_down "$RUNNER_STACK"
-  compose_down "$SUPABASE_STACK"
-  compose_down "$TRAEFIK_STACK"
+    app_stop_current
 
-  state_platform_down
-  info "Platform is DOWN"
+    stacks="$(platform_each_stack)"
+
+    for stack in $(printf "%s\n" "$stacks" | awk '{a[NR]=$0} END{for(i=NR;i>=1;i--)print a[i]}')
+    do
+        compose_down "$stack"
+    done
+
+    state_platform_down
+
+    info "Platform is DOWN"
+
 }
